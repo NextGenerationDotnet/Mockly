@@ -1,0 +1,21 @@
+<Project>
+  <ItemGroup>
+    <PackageVersion Include="coverlet.msbuild" Version="6.0.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.6.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.7.0" />
+    <PackageVersion Include="MinVer" Version="4.3.0" />
+    <PackageVersion Include="Shouldly" Version="4.2.1" />
+    <PackageVersion Include="xunit" Version="2.5.0" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.0" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(IsTestProject)' == 'true' ">
+    <Using Include="Shouldly" />
+    <Using Include="Xunit" />
+    <PackageReference Include="coverlet.msbuild" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Shouldly" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" PrivateAssets="All" />
+  </ItemGroup>
+</Project>

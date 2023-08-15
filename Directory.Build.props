@@ -1,0 +1,33 @@
+<Project>
+  <PropertyGroup>
+    <AnalysisMode>All</AnalysisMode>
+    <Authors>Chris Farmer, Hugo Woodiwiss</Authors>
+    <Copyright>Copyright (c) Chris Farmer and Hugo Woodiwiss 2023-$([System.DateTime]::Now.ToString(yyyy))</Copyright>
+    <DefaultClassLibFramework>netstandard2.0</DefaultClassLibFramework>
+    <Deterministic>true</Deterministic>
+    <Description>Allan please add details</Description>
+    <EnablePackageValidation>true</EnablePackageValidation>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <Nullable>enable</Nullable>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/FILLMEIN/Mockly</PackageProjectUrl>
+    <PackageReleaseNotes>$(PackageProjectUrl)/releases</PackageReleaseNotes>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryType>git</RepositoryType>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+  </PropertyGroup>
+  <PropertyGroup>
+    <MinVerDefaultPreReleaseIdentifiers>preview</MinVerDefaultPreReleaseIdentifiers>
+    <MinVerIgnoreHeight>true</MinVerIgnoreHeight>
+    <MinVerSkip Condition=" '$(Configuration)' == 'Debug' ">true</MinVerSkip>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+  </PropertyGroup>
+  <ItemGroup Condition=" '$(IsPackable)' == 'true'">
+    <None Include="$(MSBuildThisFileDirectory)\docs\README.md" Pack="true" PackagePath="\"/>
+    <None Include="$(MSBuildThisFileDirectory)\LICENSE" Pack="true" PackagePath="\"/>
+    <PackageReference Include="MinVer" PrivateAssets="All" />
+  </ItemGroup>
+</Project>
