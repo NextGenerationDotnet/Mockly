@@ -3,9 +3,12 @@ using System.Diagnostics;
 using System.Reflection.Metadata;
 using System.Text;
 
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
+
+using Mockly.Generator.CodeGeneration;
 
 namespace Mockly.Generator;
 
@@ -70,7 +73,7 @@ public class MocklyGenerator : IIncrementalGenerator
 
         StringBuilder sb = new();
 
-        sb.Append(CodeSnippets.ArgumentativeFilterFileHeader);
+        sb.Append(CodeSnippets.MocklyFileHeader);
         Stopwatch codegenTimer = new();
 
         if (debugOutputEnabled)
@@ -84,8 +87,6 @@ public class MocklyGenerator : IIncrementalGenerator
             sb.AppendLine();
         }
 
-        sb.AppendLine(ConstantTypeCode.ArgumentativeFiltersParameterHelpers);
-
         var sourceText = SourceText.From(sb.ToString(), Encoding.UTF8);
         if (debugOutputEnabled)
         {
@@ -98,5 +99,65 @@ public class MocklyGenerator : IIncrementalGenerator
         }
 
         context.AddSource($"ArgumentativeFilters.g.cs", sourceText);
+    }
+
+    private static void GenerateFilterFactory(Compilation compilation, MethodDeclarationSyntax filter, StringBuilder sb)
+    {
+        var semanticModel = compilation.GetSemanticModel(filter.SyntaxTree);
+        var filterMethodSymbol = semanticModel.GetDeclaredSymbol(filter);
+
+        if (filterMethodSymbol is null)
+        {
+            return;
+        }
+
+        var containingNamespace = filterMethodSymbol.ContainingNamespace.ToDisplayString();
+
+        var containingClassSyntax = filter.Parent switch
+        {
+            ClassDeclarationSyntax cds => cds,
+            _ => throw new InvalidOperationException("Filter must be declared in a partial class.")
+        };
+
+        if (containingClassSyntax.Modifiers.All(a => !a.IsKind(SyntaxKind.PartialKeyword)))
+        {
+            return;
+        }
+
+        var containingClass = filterMethodSymbol.ContainingType!;
+        // var parameters = filter.ParameterList.Parameters.Select(s => ParameterCodeProviderFactory.GetParameterCodeProvider(s, compilation)).ToArray();
+        var containingTypes = GetContainingTypes(filterMethodSymbol);
+
+
+        ContainingHierarchyBuilder hierarchyBuilder = new(sb);
+
+        hierarchyBuilder.AddContainingHierarchy(containingTypes, containingNamespace);
+
+        // FilterFactoryBuilder builder = new(sb, hierarchyBuilder.CurrentIndentationLevel);
+        // builder
+        //     .AddFilterFactorySignature(containingClass.GetAccessibilityString())
+        //     .AddFactoryCode(parameters.OfType<IFactoryCodeProvider>().ToImmutableArray())
+        //     .AddFilterConditionCode(parameters.OfType<IFilterConditionProvider>().ToImmutableArray())
+        //     .StartFilterClosure()
+        //     .AddFilterCode(parameters.OfType<IFilterCodeProvider>().ToImmutableArray())
+        //     .AddFilterCall(filter.Identifier.Text, parameters.ToImmutableArray())
+        //     .EndFilterClosure()
+        //     .EndFilterCondition()
+        //     .EndFilterFactory();
+
+        hierarchyBuilder.CloseContainingHierarchy();
+    }
+
+    private static Stack<INamedTypeSymbol> GetContainingTypes(IMethodSymbol typeSymbol)
+    {
+        var stack = new Stack<INamedTypeSymbol>();
+        var current = typeSymbol.ContainingType;
+        while (current is not null)
+        {
+            stack.Push(current);
+            current = current.ContainingType;
+        }
+
+        return stack;
     }
 }
