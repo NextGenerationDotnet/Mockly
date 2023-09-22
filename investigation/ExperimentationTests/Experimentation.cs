@@ -1,4 +1,4 @@
-using Mockly.Attributes;
+using Mockly;
 
 using NSubstitute;
 
